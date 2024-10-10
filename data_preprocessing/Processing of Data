@@ -1,0 +1,24 @@
+preprocess.py
+
+
+import pandas as pd
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+# Download NLTK data
+nltk.download('punkt')
+nltk.download('stopwords')
+
+# Preprocessing function
+def preprocess_text(text):
+    tokens = word_tokenize(text.lower())
+    tokens = [word for word in tokens if word.isalnum()]
+    stop_words = set(stopwords.words('english'))
+    tokens = [word for word in tokens if word not in stop_words]
+    return " ".join(tokens)
+
+# Example preprocessing
+df = pd.read_csv('data_collection/tweets.csv')
+df['Cleaned_Tweet'] = df['Tweet'].apply(preprocess_text)
+df.to_csv('preprocessed_tweets.csv', index=False)
