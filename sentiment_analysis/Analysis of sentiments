@@ -1,0 +1,20 @@
+sentiment_analysis.py
+
+Code - 
+from textblob import TextBlob
+import pandas as pd
+
+# Sentiment analysis function
+def analyze_sentiment(text):
+    analysis = TextBlob(text)
+    if analysis.sentiment.polarity > 0:
+        return 'Positive'
+    elif analysis.sentiment.polarity == 0:
+        return 'Neutral'
+    else:
+        return 'Negative'
+
+# Apply to preprocessed data
+df = pd.read_csv('data_preprocessing/preprocessed_tweets.csv')
+df['Sentiment'] = df['Cleaned_Tweet'].apply(analyze_sentiment)
+df.to_csv('tweets_with_sentiment.csv', index=False)
