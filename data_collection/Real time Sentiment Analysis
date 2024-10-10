@@ -1,3 +1,115 @@
 twitter_collection.py/
+
+Code - import tweepy
+import pandas as pd
+
+# Twitter API credentials
+api_key = 'your_api_key'
+api_secret_key = 'your_secret_key'
+access_token = 'your_access_token'
+access_token_secret = 'your_access_token_secret'
+
+# Authenticate to Twitter
+auth = tweepy.OAuth1UserHandler(api_key, api_secret_key, access_token, access_token_secret)
+api = tweepy.API(auth)
+
+# Collect tweets
+def get_tweets(query, count=100):
+    tweets = api.search(q=query, count=count, lang='en')
+    tweet_data = [[tweet.text, tweet.created_at] for tweet in tweets]
+    df = pd.DataFrame(tweet_data, columns=['Tweet', 'Timestamp'])
+    return df
+
+if __name__ == "__main__":
+    df = get_tweets("#YourBrand")
+    df.to_csv('tweets.csv', index=False)
+
 facebook_collection.py/
+
+Code - import requests
+import pandas as pd
+import json
+
+# Facebook API credentials
+access_token = 'your_facebook_access_token'
+page_id = 'your_page_id'
+
+# URL for Facebook Graph API
+def get_facebook_posts(page_id, access_token):
+    url = f"https://graph.facebook.com/v16.0/{page_id}/posts"
+    params = {
+        'access_token': access_token,
+        'fields': 'message,created_time,comments.summary(true),reactions.summary(true)'
+    }
+    response = requests.get(url, params=params)
+    return response.json()
+
+# Function to parse post data
+def parse_facebook_posts(data):
+    posts_data = []
+    for post in data['data']:
+        post_message = post.get('message', '')
+        post_created_time = post.get('created_time', '')
+        post_comments_count = post.get('comments', {}).get('summary', {}).get('total_count', 0)
+        post_reactions_count = post.get('reactions', {}).get('summary', {}).get('total_count', 0)
+        
+        posts_data.append([post_message, post_created_time, post_comments_count, post_reactions_count])
+    
+    return pd.DataFrame(posts_data, columns=['Message', 'Created Time', 'Comments Count', 'Reactions Count'])
+
+if __name__ == "__main__":
+    # Fetch posts from the Facebook Page
+    facebook_data = get_facebook_posts(page_id, access_token)
+    
+    # Parse and convert to DataFrame
+    if 'data' in facebook_data:
+        df = parse_facebook_posts(facebook_data)
+        df.to_csv('facebook_posts.csv', index=False)
+        print("Facebook posts saved to 'facebook_posts.csv'")
+    else:
+        print("Error fetching Facebook posts:", facebook_data)
+
 instagram_collection.py/
+
+Code - import requests
+import pandas as pd
+
+# Instagram API credentials
+access_token = 'your_instagram_access_token'
+instagram_account_id = 'your_instagram_business_account_id'
+
+# Function to get Instagram posts
+def get_instagram_posts(instagram_account_id, access_token):
+    url = f"https://graph.facebook.com/v16.0/{instagram_account_id}/media"
+    params = {
+        'access_token': access_token,
+        'fields': 'caption,timestamp,comments_count,like_count'
+    }
+    response = requests.get(url, params=params)
+    return response.json()
+
+# Function to parse Instagram post data
+def parse_instagram_posts(data):
+    posts_data = []
+    for post in data['data']:
+        post_caption = post.get('caption', '')
+        post_timestamp = post.get('timestamp', '')
+        post_comments_count = post.get('comments_count', 0)
+        post_like_count = post.get('like_count', 0)
+        
+        posts_data.append([post_caption, post_timestamp, post_comments_count, post_like_count])
+    
+    return pd.DataFrame(posts_data, columns=['Caption', 'Timestamp', 'Comments Count', 'Like Count'])
+
+if __name__ == "__main__":
+    # Fetch Instagram posts
+    instagram_data = get_instagram_posts(instagram_account_id, access_token)
+    
+    # Parse and convert to DataFrame
+    if 'data' in instagram_data:
+        df = parse_instagram_posts(instagram_data)
+        df.to_csv('instagram_posts.csv', index=False)
+        print("Instagram posts saved to 'instagram_posts.csv'")
+    else:
+        print("Error fetching Instagram posts:", instagram_data)
+
