@@ -1,0 +1,22 @@
+monitoring.py
+
+Code - 
+import tweepy
+from elasticsearch import Elasticsearch
+
+# Connect to Elasticsearch
+es = Elasticsearch()
+
+# Stream tweets and store in Elasticsearch
+class StreamListener(tweepy.StreamListener):
+    def on_status(self, status):
+        tweet = {
+            'text': status.text,
+            'timestamp': status.created_at
+        }
+        es.index(index='tweets', body=tweet)
+
+# Set up real-time monitoring (fill in with appropriate authentication)
+listener = StreamListener()
+stream = tweepy.Stream(auth=api.auth, listener=listener)
+stream.filter(track=['#YourBrand'])
